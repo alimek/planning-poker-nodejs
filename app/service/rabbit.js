@@ -1,38 +1,52 @@
-var amqp = require('amqplib');
 var config = require('../config');
-var open = amqp.connect(config.rabbitConfig.url);
 
-function RabbitService() {
-    var vm = this;
-    vm.sendToQueue = sendToQueue;
-    vm.receiveFromQueue = receiveFromQueue;
-    
-    function sendToQueue(name, message) {
-        return open.then(function(conn) {
-            return conn.createChannel();
-        }).then(function(ch) {
-            return ch.assertQueue(name).then(function(ok) {
-                return ch.sendToQueue(name, new Buffer(JSON.stringify(message)));
-            });
-        }).catch(console.warn);
+module.exports = (rabbitConnection) => {
+  return new RabbitService(rabbitConnection);
+};
+
+/**
+ * @param {object} rabbitConnection
+ * @constructor
+ */
+function RabbitService(rabbitConnection) {
+  var ready;
+
+  this.createGame = createGame;
+  this.isReady = isReady;
+  this.setReady = setReady;
+
+  rabbitConnection.on('ready', () => {
+    this.publisher = rabbitConnection.socket('PUB');
+    this.subscriber = rabbitConnection.socket('SUB');
+
+    ready = true;
+  });
+
+  /**
+   * @returns {boolean}
+   */
+  function isReady() {
+    return ready;
+  }
+
+  /**
+   * @param {boolean} _ready
+   */
+  function setReady(_ready) {
+    ready = _ready;
+  }
+  
+  /**
+   * @param {object} obj
+   */
+  function createGame(obj) {
+    var publisher = this.publisher;
+
+    if (ready) {
+      publisher.connect('gameCreated', () => {
+        console.log('Wysyłam do rabbita', obj);
+        publisher.write(JSON.stringify(obj));
+      });
     }
-
-    function receiveFromQueue(name, callback) {
-        return open.then(function(conn) {
-            return conn.createChannel();
-        }).then(function(ch) {
-            return ch.assertQueue(name).then(function(ok) {
-                return ch.consume(name, function(msg) {
-                    if (msg !== null) {
-                        console.log(msg.content.toString());
-                        callback(msg);
-                        ch.ack(msg);
-                    }
-                });
-            });
-        }).catch(console.warn);
-    }
-
+  }
 }
-
-module.exports = new RabbitService();
