@@ -1,4 +1,5 @@
-var config = require('../config');
+var config = require('../config')
+var promise = require('bluebird');
 
 module.exports = (rabbitConnection) => {
   return new RabbitService(rabbitConnection);
@@ -9,18 +10,29 @@ module.exports = (rabbitConnection) => {
  * @constructor
  */
 function RabbitService(rabbitConnection) {
-  var ready;
+  var ready = promise.defer();
+  var subscriber;
+  var publisher;
 
-  this.createGame = createGame;
+  this.getSubscriber = getSubscriber;
+  this.getPublisher = getPublisher;
   this.isReady = isReady;
   this.setReady = setReady;
 
-  rabbitConnection.on('ready', () => {
-    this.publisher = rabbitConnection.socket('PUB');
-    this.subscriber = rabbitConnection.socket('SUB');
 
-    ready = true;
+  ready = new promise(function (resolve, reject) {
+    rabbitConnection.on('ready', () => {
+      publisher = rabbitConnection.socket('PUB', {routing: 'topic'});
+      subscriber = rabbitConnection.socket('SUB', {routing: 'topic'});
+      resolve({
+        publisher: publisher,
+        subscriber: subscriber
+      })
+    });
   });
+
+
+
 
   /**
    * @returns {boolean}
@@ -35,18 +47,19 @@ function RabbitService(rabbitConnection) {
   function setReady(_ready) {
     ready = _ready;
   }
-  
-  /**
-   * @param {object} obj
-   */
-  function createGame(obj) {
-    var publisher = this.publisher;
 
-    if (ready) {
-      publisher.connect('gameCreated', () => {
-        console.log('Wysyłam do rabbita', obj);
-        publisher.write(JSON.stringify(obj));
-      });
-    }
+  /**
+   * @returns {object}
+   */
+  function getSubscriber() {
+    return subscriber;
   }
+
+  /**
+   * @returns {object}
+   */
+  function getPublisher() {
+    return publisher;
+  }
+
 }
