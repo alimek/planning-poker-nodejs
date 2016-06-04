@@ -21,8 +21,8 @@ function RabbitService(rabbitConnection) {
 
   ready = new promise(function (resolve, reject) {
     rabbitConnection.on('ready', () => {
-      publisher = rabbitConnection.socket('PUB', { routing: 'topic' });
-      subscriber = rabbitConnection.socket('SUB', { routing: 'topic' });
+      publisher = rabbitConnection.socket('PUB', { routing: 'topic', noCreate: true });
+      subscriber = rabbitConnection.socket('SUB', { routing: 'topic', noCreate: true });
       resolve({
         publisher: publisher,
         subscriber: subscriber
