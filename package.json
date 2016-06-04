@@ -1,11 +1,11 @@
 {
   "name": "PlanningPoker",
   "version": "1.0.0",
-  "description": "Node js planning pocker",
+  "description": "Node js planning poker",
   "main": "app/app.js",
   "repository": "https://github.com/alimek/planning-poker-nodejs.git",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",
