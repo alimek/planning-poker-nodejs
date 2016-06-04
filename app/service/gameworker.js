@@ -4,14 +4,17 @@ module.exports = (io, rabbitService) => {
         var sub = obj.subscriber;
         //var pub = obj.publisher;
 
-        sub.connect('game', () => {
+        sub.connect('game', 'game.create', () => {
             var game;
 
             sub.setEncoding('utf8');
-            sub.on('game.create', function (data) {
-                game = JSON.parse(data);
-
-                console.log('Game created', game.id, "\n");
+            sub.on('data', function (data) {
+                try {
+                    game = JSON.parse(data);
+                    console.log('Game created', game.id, "\n");
+                } catch (e) {
+                    console.log(e);
+                }
 
                 //io.on('connection', (socket) => {
                 //    socket.on('game-574035eb9ff152691f0041a7/create', (data) => {
