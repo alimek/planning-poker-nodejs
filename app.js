@@ -5,7 +5,6 @@ var rabbitjs = require('rabbit.js');
 var config = require('./app/config');
 var rabbitConnection = rabbitjs.createContext(config.rabbitConfig.url);
 var rabbitService = require('./app/service/rabbit')(rabbitConnection);
-var socketService = require('./app/service/sockio')(io, rabbitService);
 var gameWorkerService = require('./app/service/gameworker')(io, rabbitService);
 
 httpServer.listen(config.wsPort, '0.0.0.0', function () {
