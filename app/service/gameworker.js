@@ -1,12 +1,11 @@
+module.exports = (io, rabbitService) => {
 
-function GameWorkerService(io, rabbitService) {
-
-    rabbitService.isReady().then(function (obj){
+    rabbitService.isReady().then(function (obj) {
         var sub = obj.subscriber;
         // var pub = obj.publisher;
 
         sub.connect('game', 'game.create', () => {
-            sub.on('data', function(data) {
+            sub.on('data', function (data) {
 
                 console.log(data);
 
@@ -14,7 +13,7 @@ function GameWorkerService(io, rabbitService) {
                 // socket.on('game-574035eb9ff152691f0041a7/create', (data) => {
 
                 // io.on('connection', (socket) => {
-                io.sockets.emit('game-123/create', {asd: 2});
+                io.sockets.emit('game-123/create', { asd: 2 });
                 // });
 
                 // io.in('game-123').emit('create', 'dasdas');
@@ -37,6 +36,4 @@ function GameWorkerService(io, rabbitService) {
     io.on('connection', (socket) => {
         console.log('New connection', socket.id);
     });
-}
-
-module.exports = GameWorkerService;
+};

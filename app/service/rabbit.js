@@ -1,4 +1,4 @@
-var config = require('../config')
+var config = require('../config');
 var promise = require('bluebird');
 
 module.exports = (rabbitConnection) => {
@@ -10,7 +10,7 @@ module.exports = (rabbitConnection) => {
  * @constructor
  */
 function RabbitService(rabbitConnection) {
-  var ready = promise.defer();
+  var ready;
   var subscriber;
   var publisher;
 
@@ -19,20 +19,16 @@ function RabbitService(rabbitConnection) {
   this.isReady = isReady;
   this.setReady = setReady;
 
-
   ready = new promise(function (resolve, reject) {
     rabbitConnection.on('ready', () => {
-      publisher = rabbitConnection.socket('PUB', {routing: 'topic'});
-      subscriber = rabbitConnection.socket('SUB', {routing: 'topic'});
+      publisher = rabbitConnection.socket('PUB', { routing: 'topic' });
+      subscriber = rabbitConnection.socket('SUB', { routing: 'topic' });
       resolve({
         publisher: publisher,
         subscriber: subscriber
       })
     });
   });
-
-
-
 
   /**
    * @returns {boolean}
@@ -61,5 +57,4 @@ function RabbitService(rabbitConnection) {
   function getPublisher() {
     return publisher;
   }
-
 }
