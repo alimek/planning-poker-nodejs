@@ -55,6 +55,11 @@ module.exports = (io, rabbitService) => {
           socket.broadcast.to('game-'+gameID).emit('new-player', user);
         });
 
+        socket.on('player-updated', (user) => {
+          socket.user = user;
+          socket.broadcast.to('game-'+socket.game.id).emit('player-updated', user);
+        });
+
         socket.on('disconnect', () => {
           if (!_.isUndefined(socket.game)) {
             socket.broadcast.to('game-'+socket.game.id).emit('player-leaved', socket.user.id);
