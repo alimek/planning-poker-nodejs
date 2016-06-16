@@ -67,8 +67,8 @@ module.exports = (io, rabbitService) => {
         });
 
         socket.on('player-updated', (user) => {
-          socket.user = user;
-          emitToGameRoom(socket, 'player-updated', socker.user.serialize());
+          socket.user.name = user.name;
+          emitToGameRoom(socket, 'player-updated', socket.user.serialize());
         });
 
         socket.on('task-added', (task) => {
