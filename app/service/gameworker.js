@@ -79,6 +79,12 @@ module.exports = (io, rabbitService) => {
           });
         });
 
+        socket.on('start-game', (gameID) => {
+          var game = _.find(games, {id: gameID});
+          game.started = true;
+          emitToGameRoom(socket, 'game-started', true);
+        });
+
         socket.on('disconnect', () => {
           if (!_.isUndefined(socket.game)) {
             emitToGameRoom(socket, 'player-leaved', socket.user.id);

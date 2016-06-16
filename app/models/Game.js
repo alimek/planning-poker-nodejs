@@ -14,6 +14,7 @@ function Game(_id, _name) {
   game.sockets = [];
   game.name = _name;
   game.tasks = [];
+  game.started = false;
   
   game.removeSocket = removeSocket;
   game.addTask = addTask;
