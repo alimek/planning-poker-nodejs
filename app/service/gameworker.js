@@ -52,7 +52,17 @@ module.exports = (io, rabbitService) => {
 
 
           socket.emit('players', players);
+          socket.emit('tasks', game.tasks);
           socket.broadcast.to('game-'+gameID).emit('new-player', user);
+        });
+
+        socket.on('card-picked', (value) => {
+          var game = socket.game;
+          socket.pickedCard = parseInt(value);
+          game.update();
+          if (game.taskFinished) {
+            socket.broadcast.to('game-'+ game.id).emit('task-finished', game.calculateCurrentTaskPoints());
+          }
         });
 
         socket.on('player-updated', (user) => {
