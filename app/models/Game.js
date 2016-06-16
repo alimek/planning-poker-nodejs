@@ -1,15 +1,34 @@
 var _ = require('lodash');
 
+/**
+ * @param {string} _id
+ * @param {string} _name
+ * @constructor
+ */
 function Game(_id, _name) {
-  this.id = _id;
-  this.sockets = [];
-  var name = _name;
+  var game = this;
+
+  game.id = _id;
+  game.sockets = [];
+  game.name = _name;
+  game.tasks = [];
   
-  this.removeSocket = removeSocket;
+  game.removeSocket = removeSocket;
+  game.addTask = addTask;
 
 
+  /**
+   * @param {string} name
+   */
+  function addTask(name) {
+    game.tasks.push({name: name});
+  }
+
+  /**
+   * @param {Socket} socket
+   */
   function removeSocket(socket) {
-    _.remove(this.sockets, socket);
+    _.remove(game.sockets, socket);
   }
   
   
