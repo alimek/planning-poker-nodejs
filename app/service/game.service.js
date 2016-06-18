@@ -2,20 +2,7 @@ var request = require('request-promise');
 var _ = require('lodash');
 
 var config = require('../config');
-
-var generateOptions = (url) => {
-  return {
-    url: url,
-    headers: {
-      'Content-type': 'application/json',
-      'Accept': 'application/json'
-    }
-  }
-};
-
-var responseToJson = (response) => {
-  return _.isUndefined(response) ? null : JSON.parse(response);
-};
+var restHelper = require('./rest.helper');
 
 module.exports = () => {
 
@@ -33,8 +20,8 @@ module.exports = () => {
      * @returns {Promise}
      */
     function getGame(gameID) {
-      var options = generateOptions(config.apiURL + '/games/' + gameID);
-      return request(options).then(responseToJson);
+      var options = restHelper.generateOptions(config.apiURL + '/games/' + gameID);
+      return request(options).then(restHelper.responseToJson);
     }
 
     /**
@@ -42,11 +29,11 @@ module.exports = () => {
      * @returns {Promise}
      */
     function startGame(gameID) {
-      var options = generateOptions(config.apiURL + '/games/' + gameID + '/start');
+      var options = restHelper.generateOptions(config.apiURL + '/games/' + gameID + '/start');
       _.extend(options, {
         method: 'PATCH'
       });
-      return request(options).then(responseToJson());
+      return request(options).then(restHelper.responseToJson());
     }
   }
 

@@ -42,6 +42,7 @@ function Game(_id) {
    */
   function updateFromApi(responseData) {
     game.name = responseData.name;
+    game.tasks = responseData.tasks;
   }
 
 

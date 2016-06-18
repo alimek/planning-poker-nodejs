@@ -1,7 +1,9 @@
 const _ = require('lodash');
+
 const GameModel = require('../models/Game');
 const UserModel = require('../models/User');
 const GameService = require('./game.service')();
+const TaskService = require('./task.service')();
 
 var games = [];
 
@@ -45,7 +47,7 @@ module.exports = (io, rabbitService) => {
         socket.on('game', onJoinedToGame);
         socket.on('card-picked', onCardPicked);
         socket.on('player-updated', onPlayerUpdated);
-        socket.on('task-added', onTaskAdded);
+        socket.on('add-task', onTaskAdded);
         socket.on('start-game', startGame);
         socket.on('disconnect', onDisconnect);
 
@@ -125,10 +127,25 @@ module.exports = (io, rabbitService) => {
          */
         function onTaskAdded(task) {
           var game = _.find(games, {id: task.gameID});
-          game.addTask(task.name);
-          emitToGameRoom(socket, 'task-added', {
-            name: task.name
-          });
+          TaskService
+            .addTask(game, task.name)
+            .then(handleSuccess, handleFailed);
+
+          /**
+           * @param {object} _task
+           */
+          function handleSuccess(_task) {
+            game.addTask(task.name);
+            emitToAllInGame(socket, 'task-added', _task);
+          }
+
+          /**
+           * @param {object} response
+           */
+          function handleFailed(response) {
+            //TODO: handle failed adding task
+            console.log('failed', response);
+          }
         }
       });
 
@@ -193,6 +210,15 @@ module.exports = (io, rabbitService) => {
    */
   function emitToGameRoom(socket, event, data) {
     socket.broadcast.to('game-' + socket.game.id).emit(event, data);
+  }
+
+  /**
+   * @param {Socket} socket
+   * @param {string} event
+   * @param {*} data
+   */
+  function emitToAllInGame(socket, event, data) {
+    io.to('game-' + socket.game.id).emit(event, data);
   }
 
   /**
