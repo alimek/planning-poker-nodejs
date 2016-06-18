@@ -1,4 +1,5 @@
 var request = require('request-promise');
+var _ = require('lodash');
 
 var config = require('../config');
 
@@ -13,7 +14,7 @@ var generateOptions = (url) => {
 };
 
 var responseToJson = (response) => {
-  return JSON.parse(response);
+  return _.isUndefined(response) ? null : JSON.parse(response);
 };
 
 module.exports = () => {
@@ -25,10 +26,27 @@ module.exports = () => {
     var service = this;
 
     service.getGame = getGame;
+    service.startGame = startGame;
 
+    /**
+     * @param {string} gameID
+     * @returns {Promise}
+     */
     function getGame(gameID) {
       var options = generateOptions(config.apiURL + '/games/' + gameID);
       return request(options).then(responseToJson);
+    }
+
+    /**
+     * @param {string} gameID
+     * @returns {Promise}
+     */
+    function startGame(gameID) {
+      var options = generateOptions(config.apiURL + '/games/' + gameID + '/start');
+      _.extend(options, {
+        method: 'PATCH'
+      });
+      return request(options).then(responseToJson());
     }
   }
 

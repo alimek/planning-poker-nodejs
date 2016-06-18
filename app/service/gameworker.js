@@ -25,13 +25,27 @@ module.exports = (io, rabbitService) => {
           }
         });
       });
+      
+      sub.connect('game', 'game.started', () => {
+        sub.setEncoding('utf8');
+        sub.on('data', (data) => {
+          try {
+            data = JSON.parse(data);
+            var game = _.find(games, data.id);
+            game.startGame();
+            game.emit('game-started', true);
+          } catch (e) {
+            console.log(e);
+          }
+        });
+      });
 
       io.on('connection', (socket) => {
         //TODO: Refactor it
         socket.on('game', onJoinedToGame);
         socket.on('card-picked', onCardPicked);
         socket.on('player-updated', onPlayerUpdated);
-        socket.on('create-tasks', onTaskAdded);
+        socket.on('task-added', onTaskAdded);
         socket.on('start-game', startGame);
         socket.on('disconnect', onDisconnect);
 
@@ -85,9 +99,25 @@ module.exports = (io, rabbitService) => {
          * @param {string} gameID
          */
         function startGame(gameID) {
-          var game = _.find(games, {id: gameID});
-          game.started = true;
-          emitToGameRoom(socket, 'game-started', true);
+          GameService
+            .startGame(gameID)
+            .then(handleSuccess, handleFailed);
+
+          function handleSuccess() {
+            var game = findGameById(gameID);
+
+            if (!_.isUndefined(game)) {
+              game.emit('game-started', true);
+            }
+          }
+
+          /**
+           * @param {object} response
+           */
+          function handleFailed(response) {
+            //TODO: when failed staring game
+            console.log('failed', response);
+          }
         }
 
         /**
@@ -96,7 +126,6 @@ module.exports = (io, rabbitService) => {
         function onTaskAdded(task) {
           var game = _.find(games, {id: task.gameID});
           game.addTask(task.name);
-          publishNewTask(game, task);
           emitToGameRoom(socket, 'task-added', {
             name: task.name
           });
@@ -164,5 +193,13 @@ module.exports = (io, rabbitService) => {
    */
   function emitToGameRoom(socket, event, data) {
     socket.broadcast.to('game-' + socket.game.id).emit(event, data);
+  }
+
+  /**
+   * @param {string} gameID
+   * @return {GameModel|undefined}
+   */
+  function findGameById(gameID) {
+    return _.find(games, {id: gameID});
   }
 };

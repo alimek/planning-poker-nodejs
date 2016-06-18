@@ -20,6 +20,22 @@ function Game(_id) {
   game.update = update;
   game.calculateCurrentTaskPoints = calculateCurrentTaskPoints;
   game.updateFromApi = updateFromApi;
+  game.startGame = startGame;
+  game.emit = emit;
+
+  /**
+   * @param {string} eventName
+   * @param {*} data
+   */
+  function emit(eventName, data) {
+    _.forEach(game.sockets, (socket) => {
+      socket.emit(eventName, data);
+    });
+  }
+
+  function startGame() {
+    game.started = true;
+  }
 
   /**
    * @param {object} responseData
