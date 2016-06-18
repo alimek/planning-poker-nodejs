@@ -28,8 +28,18 @@ module.exports = (io, rabbitService) => {
 
       io.on('connection', (socket) => {
         //TODO: Refactor it
-        socket.on('game', (connectionToGame) => {
-          var game, players = [];
+        socket.on('game', onJoinedToGame);
+        socket.on('card-picked', onCardPicked);
+        socket.on('player-updated', onPlayerUpdated);
+        socket.on('create-tasks', onTaskAdded);
+        socket.on('start-game', startGame);
+        socket.on('disconnect', onDisconnect);
+
+        /**
+         * @param {object} connectionToGame
+         */
+        function onJoinedToGame(connectionToGame) {
+          var game;
 
           fetchGame(connectionToGame.gameID)
             .then((_game) => {
@@ -39,9 +49,12 @@ module.exports = (io, rabbitService) => {
               socket.join('game-' + connectionToGame.gameID);
               emitToGameRoom(socket, 'new-player', socket.user.serialize());
             });
-        });
+        }
 
-        socket.on('card-picked', (value) => {
+        /**
+         * @param {string} value
+         */
+        function onCardPicked(value) {
           var game = socket.game;
           value = parseInt(value);
           socket.user.pickCard(value);
@@ -51,35 +64,57 @@ module.exports = (io, rabbitService) => {
           if (game.taskFinished) {
             emitToGameRoom(socket, 'task-finished', game.calculateCurrentTaskPoints());
           }
-        });
+        }
 
-        socket.on('player-updated', (user) => {
+        /**
+         * @param user
+         */
+        function onPlayerUpdated(user) {
           socket.user.name = user.name;
           emitToGameRoom(socket, 'player-updated', socket.user.serialize());
-        });
+        }
 
-        socket.on('task-added', (task) => {
-          var game = _.find(games, {id: task.gameID});
-          game.addTask(task.name);
-          emitToGameRoom(socket, 'task-added', {
-            name: task.name
-          });
-        });
-
-        socket.on('start-game', (gameID) => {
-          var game = _.find(games, {id: gameID});
-          game.started = true;
-          emitToGameRoom(socket, 'game-started', true);
-        });
-
-        socket.on('disconnect', () => {
+        function onDisconnect() {
           if (!_.isUndefined(socket.game)) {
             emitToGameRoom(socket, 'player-leaved', socket.user.id);
             socket.game.removeSocket(socket);
           }
-        });
+        }
+
+        /**
+         * @param {string} gameID
+         */
+        function startGame(gameID) {
+          var game = _.find(games, {id: gameID});
+          game.started = true;
+          emitToGameRoom(socket, 'game-started', true);
+        }
+
+        /**
+         * @param {object} task
+         */
+        function onTaskAdded(task) {
+          var game = _.find(games, {id: task.gameID});
+          game.addTask(task.name);
+          publishNewTask(game, task);
+          emitToGameRoom(socket, 'task-added', {
+            name: task.name
+          });
+        }
       });
 
+      /**
+       * @param {GameModel} game
+       * @param {object} task
+       */
+      function publishNewTask(game, task) {
+        pub.connect('task', () => {
+          pub.publish('task.created', JSON.stringify({
+            game: game.id,
+            task: task
+          }));
+        });
+      }
     });
 
   /**
