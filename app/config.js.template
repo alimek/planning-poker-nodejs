@@ -1,5 +1,6 @@
 module.exports = {
   wsPort: 8080,
+  apiURL: 'http://pgs-poker.com/app_dev.php',
   rabbitConfig: {
     url: 'amqp://guest:guest@localhost/'
   }

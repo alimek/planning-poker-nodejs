@@ -1,57 +1,44 @@
 const _ = require('lodash');
 const GameModel = require('../models/Game');
 const UserModel = require('../models/User');
+const GameService = require('./game.service')();
 
 var games = [];
 
 module.exports = (io, rabbitService) => {
-    rabbitService.isReady().then(function (obj) {
-        var sub = obj.subscriber;
-        //var pub = obj.publisher;
+  rabbitService
+    .isReady()
+    .then((obj) => {
+      var sub = obj.subscriber;
+      var pub = obj.publisher;
 
-        sub.connect('game', 'game.create', () => {
-            var game;
+      sub.connect('game', 'game.create', () => {
+        var game;
 
-            sub.setEncoding('utf8');
-            sub.on('data', function (data) {
-                try {
-                    game = JSON.parse(data);
-                    console.log('Game created', game.id, "\n");
-                    io.in('game-'+ game.id).emit(JSON.stringify({'foo': 'barr'}));
-                } catch (e) {
-                    console.log(e);
-                }
-
-            });
+        sub.setEncoding('utf8');
+        sub.on('data', (data) => {
+          try {
+            game = JSON.parse(data);
+            console.log('Game created', game.id, "\n");
+          } catch (e) {
+            console.log(e);
+          }
         });
-    });
+      });
 
-    io.on('connection', (socket) => {
+      io.on('connection', (socket) => {
         //TODO: Refactor it
         socket.on('game', (connectionToGame) => {
-          var gameID = connectionToGame.gameID;
-          var user = connectionToGame.user;
-          var game = _.find(games, {id: gameID});
-          var players = [];
+          var game, players = [];
 
-          if (_.isUndefined(game)) {
-            game = new GameModel(gameID, 'asdf');
-            games.push(game);
-          } else {
-            _.forEach(game.sockets, (socket) => {
-              players.push(socket.user.serialize());
+          fetchGame(connectionToGame.gameID)
+            .then((_game) => {
+              game = _game;
+
+              prepareGameAndSocket(game, socket, connectionToGame.user);
+              socket.join('game-' + connectionToGame.gameID);
+              emitToGameRoom(socket, 'new-player', socket.user.serialize());
             });
-          }
-
-          socket.game = game;
-          socket.user = UserModel.newInstance(user);
-          game.sockets.push(socket);
-          socket.join('game-'+gameID);
-
-
-          socket.emit('players', players);
-          socket.emit('tasks', game.tasks);
-          socket.broadcast.to('game-'+gameID).emit('new-player', socket.user.serialize());
         });
 
         socket.on('card-picked', (value) => {
@@ -91,7 +78,49 @@ module.exports = (io, rabbitService) => {
             socket.game.removeSocket(socket);
           }
         });
+      });
+
     });
+
+  /**
+   * @param {GameModel} game
+   * @param {Socket} socket
+   * @param {object} userData
+   */
+  function prepareGameAndSocket(game, socket, userData) {
+    var players = [];
+    _.forEach(game.sockets, (socket) => {
+      players.push(socket.user.serialize());
+    });
+
+    game.sockets.push(socket);
+    socket.emit('players', players);
+    socket.emit('tasks', game.tasks);
+    socket.game = game;
+
+    socket.user = UserModel.newInstance(userData);
+  }
+
+  /**
+   * @param {string} gameID
+   * @returns {Promise}
+   */
+  function fetchGame(gameID) {
+    var game = _.find(games, {id: gameID});
+
+    if (_.isUndefined(game)) {
+      game = new GameModel(gameID);
+      games.push(game);
+    }
+
+    return GameService
+      .getGame(gameID)
+      .then((response) => {
+        game.updateFromApi(response);
+
+        return game;
+      });
+  }
 
   /**
    * @param {Socket} socket

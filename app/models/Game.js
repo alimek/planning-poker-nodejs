@@ -2,17 +2,16 @@ var _ = require('lodash');
 
 /**
  * @param {string} _id
- * @param {string} _name
  * @constructor
  */
-function Game(_id, _name) {
+function Game(_id) {
   var game = this;
 
   game.currentTask = null;
   game.taskFinished = false;
   game.id = _id;
   game.sockets = [];
-  game.name = _name;
+  game.name = null;
   game.tasks = [];
   game.started = false;
   
@@ -20,6 +19,14 @@ function Game(_id, _name) {
   game.addTask = addTask;
   game.update = update;
   game.calculateCurrentTaskPoints = calculateCurrentTaskPoints;
+  game.updateFromApi = updateFromApi;
+
+  /**
+   * @param {object} responseData
+   */
+  function updateFromApi(responseData) {
+    game.name = responseData.name;
+  }
 
 
   function update() {
