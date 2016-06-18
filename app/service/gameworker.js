@@ -43,7 +43,6 @@ module.exports = (io, rabbitService) => {
       });
 
       io.on('connection', (socket) => {
-        //TODO: Refactor it
         socket.on('game', onJoinedToGame);
         socket.on('card-picked', onCardPicked);
         socket.on('player-updated', onPlayerUpdated);
