@@ -175,7 +175,7 @@ module.exports = (io, rabbitService) => {
 
     game.sockets.push(socket);
     socket.emit('players', players);
-    socket.emit('tasks', game.tasks);
+    socket.emit('game', game.serialize());
     socket.game = game;
 
     socket.user = UserModel.newInstance(userData);

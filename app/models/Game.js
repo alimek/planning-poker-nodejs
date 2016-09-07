@@ -13,7 +13,7 @@ function Game(_id) {
   game.sockets = [];
   game.name = null;
   game.tasks = [];
-  game.started = false;
+  game.status = null;
   
   game.removeSocket = removeSocket;
   game.addTask = addTask;
@@ -22,6 +22,15 @@ function Game(_id) {
   game.updateFromApi = updateFromApi;
   game.startGame = startGame;
   game.emit = emit;
+  game.serialize = serialize;
+
+  function serialize() {
+    return {
+      id: game.id,
+      status: game.status,
+      tasks: game.tasks
+    };
+  }
 
   /**
    * @param {string} eventName
@@ -43,6 +52,7 @@ function Game(_id) {
   function updateFromApi(responseData) {
     game.name = responseData.name;
     game.tasks = responseData.tasks;
+    game.status = responseData.status;
   }
 
 
