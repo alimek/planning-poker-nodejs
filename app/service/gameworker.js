@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const GameTaskCreatedCommand = require('../models/message/GameTaskCreatedCommand');
 
 const GameModel = require('../models/Game');
 const UserModel = require('../models/User');
@@ -14,33 +15,42 @@ module.exports = (io, rabbitService) => {
       var sub = obj.subscriber;
       var pub = obj.publisher;
 
-      sub.connect('game', 'game.create', () => {
-        var game;
+      sub.connect('game', 'game.task.created', () => {
+        sub.setEncoding('utf8');
+        sub.on('data', (data) => {
+          const command = new GameTaskCreatedCommand(JSON.parse(data));
+          console.log('sending', command.id, command);
+          io.to(`game-${command.id}`).emit('game.task.created', command);
+        });
+      });
 
-        sub.setEncoding('utf8');
-        sub.on('data', (data) => {
-          try {
-            game = JSON.parse(data);
-            console.log('Game created', game.id, "\n");
-          } catch (e) {
-            console.log(e);
-          }
-        });
-      });
+      // sub.connect('game', 'game.create', () => {
+      //   var game;
+      //
+      //   sub.setEncoding('utf8');
+      //   sub.on('data', (data) => {
+      //     try {
+      //       game = JSON.parse(data);
+      //       console.log('Game created', game.id, "\n");
+      //     } catch (e) {
+      //       console.log(e);
+      //     }
+      //   });
+      // });
       
-      sub.connect('game', 'game.started', () => {
-        sub.setEncoding('utf8');
-        sub.on('data', (data) => {
-          try {
-            data = JSON.parse(data);
-            var game = _.find(games, data.id);
-            game.startGame();
-            game.emit('game-started', true);
-          } catch (e) {
-            console.log(e);
-          }
-        });
-      });
+      // sub.connect('game', 'game.started', () => {
+      //   sub.setEncoding('utf8');
+      //   sub.on('data', (data) => {
+      //     try {
+      //       data = JSON.parse(data);
+      //       var game = _.find(games, data.id);
+      //       game.startGame();
+      //       game.emit('game-started', true);
+      //     } catch (e) {
+      //       console.log(e);
+      //     }
+      //   });
+      // });
 
       io.on('connection', (socket) => {
         socket.on('game', onJoinedToGame);
