@@ -14,6 +14,7 @@ Planning poker - one of three app for scrum poker during PGS Workshops.
     npm start
     ```
 - if you want to run with DEBUG mode 
+
     ```bash
     npm run debug
     ```
