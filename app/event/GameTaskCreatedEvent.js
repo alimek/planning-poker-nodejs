@@ -2,10 +2,12 @@
 class GameTaskCreatedEvent {
   constructor({
     id,
-    name
+    name,
+    game_id
   }) {
     this.id = id;
     this.name = name;
+    this.gameId = game_id;
   }
 }
 
