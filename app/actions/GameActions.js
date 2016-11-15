@@ -11,7 +11,7 @@ const onJoinedGame = (socket) => (data) => {
 
 const onGameMessage = (socket) => (data) => {
   const message = new GameMessage(data);
-  socket.emit().emit(message);
+  socket.in(`game-${message.id}`).emit(message);
 };
 
 

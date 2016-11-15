@@ -1,4 +1,4 @@
-class GameMessage {
+class TaskMessage {
   constructor({
     gameID,
     name
@@ -8,4 +8,4 @@ class GameMessage {
   }
 }
 
-module.exports = GameMessage;
+module.exports = TaskMessage;
