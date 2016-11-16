@@ -9,14 +9,6 @@ const onJoinedGame = (socket) => (data) => {
   debug(`Socket ${socket.id} joined to game ${message.id}`);
 };
 
-const onGameMessage = (socket) => (data) => {
-  const message = new GameMessage(data);
-  socket.in(`game-${message.id}`).emit(message);
-};
-
-
-
 module.exports = {
-  onJoinedGame,
-  onGameMessage
+  onJoinedGame
 };

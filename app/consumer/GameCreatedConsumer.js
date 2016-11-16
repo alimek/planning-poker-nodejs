@@ -9,8 +9,9 @@ class GameCreatedConsumer {
 
     this.init();
   }
+
   init() {
-    var that = this;
+    var self = this;
     this
       .connection
       .then((rabbit) => {
@@ -19,7 +20,7 @@ class GameCreatedConsumer {
           client.setEncoding('utf8');
           client.on('data', (data) => {
             const game = new GameCreatedEvent(JSON.parse(data.toString()));
-            that.io.in(`game-${game.id}`).emit('game.created', game);
+            self.io.in(`game-${game.id}`).emit('game.created', game);
             debug(`Game created`, game);
           });
         });

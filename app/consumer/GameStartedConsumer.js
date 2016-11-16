@@ -11,7 +11,7 @@ class GameStartedConsumer {
   }
 
   init() {
-    var that = this;
+    var self = this;
     this
       .connection
       .then((rabbit) => {
@@ -20,7 +20,7 @@ class GameStartedConsumer {
           client.setEncoding('utf8');
           client.on('data', (data) => {
             const game = new GameStartedEvent(JSON.parse(data.toString()));
-            that.io.in(`game-${game.id}`).emit('game.started', game);
+            self.io.in(`game-${game.id}`).emit('game.started', game);
             debug(`Game started`, game);
           });
         });

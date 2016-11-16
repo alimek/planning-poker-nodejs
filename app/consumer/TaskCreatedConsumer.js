@@ -11,16 +11,16 @@ class TaskCreatedConsumer {
   }
 
   init() {
-    var that = this;
+    var self = this;
     this
       .connection
-      .then((connection) => {
-        const client = connection.socket('SUB', { noCreate: true });
+      .then((rabbit) => {
+        const client = rabbit.socket('SUB', { noCreate: true });
         client.connect('poker', 'task.created', () => {
           client.setEncoding('utf8');
           client.on('data', (data) => {
             const event = new GameTaskCreatedEvent(JSON.parse(data.toString()));
-            that.io.in(`game-${event.gameId}`).emit('task.created', event);
+            self.io.in(`game-${event.gameId}`).emit('task.created', event);
             debug('Task Created', event);
           });
         });
