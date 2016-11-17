@@ -11,7 +11,7 @@ class TaskCreatedConsumer {
   }
 
   init() {
-    var self = this;
+    const self = this;
     this
       .connection
       .then((rabbit) => {
