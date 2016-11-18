@@ -1,8 +1,12 @@
 class GameStartedEvent {
   constructor({
-    game
+    id,
+    name,
+    status
   }) {
-    this.game = game;
+    this.id = id;
+    this.name = name;
+    this.status = status;
   }
 }
 

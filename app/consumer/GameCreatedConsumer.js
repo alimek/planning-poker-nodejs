@@ -11,15 +11,17 @@ class GameCreatedConsumer {
   }
 
   init() {
+    const self = this;
     this
       .connection
       .then((rabbit) => {
-        const client = rabbit.socket('SUB', { noCreate: true });
-        client.connect('game', 'game.created', () => {
+        const client = rabbit.socket('SUB', {noCreate: true});
+        client.connect('poker', 'game.created', () => {
           client.setEncoding('utf8');
           client.on('data', (data) => {
-              const game = new GameCreatedEvent(JSON.parse(data.toString()));
-              debug(`Game created`, game);
+            const game = new GameCreatedEvent(JSON.parse(data.toString()));
+            self.io.in(`game-${game.id}`).emit('game.created', game);
+            debug(`Game created`, game);
           });
         });
       });

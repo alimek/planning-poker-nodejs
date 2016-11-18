@@ -2,7 +2,7 @@ const debug = require('debug')('poker');
 
 const GameStartedEvent = require('../event/GameStartedEvent');
 
-class GameCreatedConsumer {
+class GameStartedConsumer {
   constructor(io, rabbitConnection) {
     this.io = io;
     this.connection = rabbitConnection;
@@ -11,14 +11,16 @@ class GameCreatedConsumer {
   }
 
   init() {
+    const self = this;
     this
       .connection
       .then((rabbit) => {
-        const client = rabbit.socket('SUB', { noCreate: true });
-        client.connect('game', 'game.started', () => {
+        const client = rabbit.socket('SUB', {noCreate: true});
+        client.connect('poker', 'game.started', () => {
           client.setEncoding('utf8');
           client.on('data', (data) => {
             const game = new GameStartedEvent(JSON.parse(data.toString()));
+            self.io.in(`game-${game.id}`).emit('game.started', game);
             debug(`Game started`, game);
           });
         });
@@ -26,4 +28,4 @@ class GameCreatedConsumer {
   }
 }
 
-module.exports = GameCreatedConsumer;
+module.exports = GameStartedConsumer;
