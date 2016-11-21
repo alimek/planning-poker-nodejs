@@ -6,7 +6,7 @@
   "repository": "https://github.com/alimek/planning-poker-nodejs.git",
   "scripts": {
     "postinstall": "cp app/config.js.template app/config.js",
-    "start": "node app/app.js",
+    "start": "node --debug app/app.js ",
     "debug": "DEBUG=poker npm start"
   },
   "author": "",
