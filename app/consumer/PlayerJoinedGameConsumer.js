@@ -2,7 +2,7 @@ const debug = require('debug')('poker');
 
 const PlayerJoinedGameEvent = require('../event/PlayerJoinedGameEvent');
 
-class PlayerJoinedConsumer {
+class PlayerJoinedGameConsumer {
   constructor(io, rabbitConnection) {
     this.io = io;
     this.connection = rabbitConnection;
@@ -28,4 +28,4 @@ class PlayerJoinedConsumer {
   }
 }
 
-module.exports = PlayerJoinedConsumer;
+module.exports = PlayerJoinedGameConsumer;
