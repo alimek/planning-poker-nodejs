@@ -1,5 +1,4 @@
-
-class GamePlayerJoinedEvent {
+class PlayerJoinedGameEvent {
   constructor({
     id,
     guid,
@@ -15,4 +14,4 @@ class GamePlayerJoinedEvent {
   }
 }
 
-module.exports = GamePlayerJoinedEvent;
+module.exports = PlayerJoinedGameEvent;
