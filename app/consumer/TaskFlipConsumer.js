@@ -1,8 +1,8 @@
 const debug = require('debug')('poker');
 
-const PlayerJoinedGameEvent = require('../event/PlayerJoinedGameEvent');
+const TaskFlippedEvent = require('../event/TaskFlippedEvent');
 
-class PlayerJoinedGameConsumer {
+class TaskFlipConsumer {
   constructor(io, rabbitConnection) {
     this.io = io;
     this.connection = rabbitConnection;
@@ -16,16 +16,16 @@ class PlayerJoinedGameConsumer {
       .connection
       .then((rabbit) => {
         const client = rabbit.socket('SUB', { routing: 'topic', noCreate: true });
-        client.connect('poker', 'player.joined', () => {
+        client.connect('poker', 'task.flip', () => {
           client.setEncoding('utf8');
           client.on('data', (data) => {
-            const event = new PlayerJoinedGameEvent(JSON.parse(data.toString()));
-            self.io.in(`game-${event.gameId}`).emit('player.joined', event);
-            debug('User joined', event);
+            const event = new TaskFlippedEvent(JSON.parse(data.toString()));
+            self.io.in(`game-${event.gameId}`).emit('task.flip', event);
+            debug('Task Flipped', event);
           });
         });
       });
   }
 }
 
-module.exports = PlayerJoinedGameConsumer;
+module.exports = TaskFlipConsumer;

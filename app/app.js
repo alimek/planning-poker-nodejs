@@ -9,7 +9,7 @@ const SocketService = require('./service/SocketService');
 
 //Run all Consumers
 require('./consumer')(io, RabbitService.connection);
-new SocketService(io);
+new SocketService(io, RabbitService);
 
 httpServer.listen(
   config.wsPort,

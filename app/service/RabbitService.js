@@ -4,6 +4,7 @@ var Promise = require('bluebird');
 class RabbitService {
   constructor(rabbitConnection) {
     this.connection = this.init(rabbitConnection);
+    this.rabbit = rabbitConnection;
   }
 
   init(rabbitConnection) {
