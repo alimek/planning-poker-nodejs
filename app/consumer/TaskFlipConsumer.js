@@ -15,7 +15,7 @@ class TaskFlipConsumer {
     this
       .connection
       .then((rabbit) => {
-        const client = rabbit.socket('SUB', { routing: 'topic', noCreate: true });
+        const client = rabbit.socket('SUB', { routing: 'topic' });
         client.connect('poker', 'task.flip', () => {
           client.setEncoding('utf8');
           client.on('data', (data) => {

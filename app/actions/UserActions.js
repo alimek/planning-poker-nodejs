@@ -4,7 +4,7 @@ const ClientStore = require('../store/ClientStore');
 const PlayerDropoutMessage = require('../message/PlayerDropoutMessage');
 
 const onDisconnect = (socket, rabbit) => () => {
-  const pub = rabbit.rabbit.socket('PUB', {routing: 'topic', noCreate: true});
+  const pub = rabbit.rabbit.socket('PUB', {routing: 'topic'});
   const player = ClientStore.getPlayer(socket.id);
   const playerDropoutMessage = new PlayerDropoutMessage(player.gameID, player.playerID.guid);
   pub.connect('poker', function() {
