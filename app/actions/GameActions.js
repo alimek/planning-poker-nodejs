@@ -7,7 +7,8 @@ const PlayerGame = require('../model/PlayerGame');
 
 const onJoinedGame = (socket) => (data) => {
   const message = new GameMessage(data);
-  
+
+  debug(message);
   socket.join(`game-${message.id}`);
   
   const playerGame = new PlayerGame(message.id, message.user, socket.id);
